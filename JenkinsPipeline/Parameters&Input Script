@@ -45,3 +45,53 @@ pipeline {
         }
     }
 }
+
+// input with timer
+pipeline {
+    agent any
+    environment { 
+        USERNAME = ""
+    }
+    stages {
+        stage('Etapa 1') { 
+            steps {
+                echo "Arranca la Etapa 1" 
+		    }
+	    }
+        stage('Etapa 2') {
+            steps {
+                script {
+                    def proceed = true
+                    def PERSONA = ""
+                    try {
+                        echo "STARTING TIMEOUT."
+                        timeout(time: 30, unit: 'SECONDS') {
+                            echo "INSIDE TIMEOUT"
+                            PERSONA = input(
+                                message: 'A quien debo saludar?',
+                                ok: "Si, continuar por favor.",
+                                parameters: [
+                                    string(
+                                        name: "PERSONA",
+                                        defaultValue: "Julian",
+                                        description: "A quien debo saludar?",
+                                        trim: false
+                                    )
+                                ]
+                            )
+                        }
+                        if(proceed) {
+                            // echo "Hola ${USERNAME}, un placer conocerte."
+                            echo "Hola ${PERSONA}, un placer conocerte."
+                        } else {
+                            echo "Cerrando proceso, adiós."
+                        }
+                    } catch (err) {
+                        echo "ERROR IN CATCH, err: ${err}"
+                        proceed = false
+                    }
+                }
+            }
+        }
+    }
+}
